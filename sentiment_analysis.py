@@ -1,7 +1,8 @@
 
 KEYWORDS_POSITIVE = ["good", "strong", "great", "nice", "awesome", "cool", "thank", "thanks", "love", "win",
                      "wonderful", "beautiful", "perfect"]
-KEYWORDS_NEGATIVE = ["bad", "weak", "terrible", "shit", "hate", "lose"]
+KEYWORDS_NEGATIVE = ["bad", "weak", "terrible", "shit", "hate", "lose", "war", "terrorist", "dictator", "poison",
+                     "scandal", "hoax", "worst", "disgrace", "dead"]
 
 
 def analyze_text(text):
