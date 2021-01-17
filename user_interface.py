@@ -13,7 +13,7 @@ class UserInterface:
         self.__continue_loop = True
         self.__scraper = TweetScraper(KEY_SOURCE)
         if self.__scraper.test_key_validity():          # Test whether provided api key works
-            print("API key successfully valid")
+            print("API key successfully validated")
             self.main_loop()
         else:                                           # If key does not work exit program
             print("No valid API key")
