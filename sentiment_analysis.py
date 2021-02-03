@@ -1,61 +1,36 @@
-# Simple functions for evaluating positive or negative sentiment in a text or dataset
-
-# Positive keywords to be searched for
-KEYWORDS_POSITIVE = ["good", "strong", "great", "nice", "awesome", "cool", "thank", "thanks", "love", "win",
-                     "wonderful", "beautiful", "perfect"]
-# Negative keywords to be searched for
-KEYWORDS_NEGATIVE = ["bad", "weak", "terrible", "shit", "hate", "lose", "war", "terrorist", "dictator", "poison",
-                     "scandal", "hoax", "worst", "disgrace", "dead"]
+# A class for using azure api for evaluating sentiment in a dataset
+from azure.ai.textanalytics import TextAnalyticsClient
+from azure.core.credentials import AzureKeyCredential
+import statistics
 
 
-def analyze_text(text):
-    """
-    Analyze sentiment within a single text sample
-    :param text: string to be analyzed
-    :return: string containing sentiment of the text( Negative, Neutral or Positive)
-    """
-    positive_words = 0
-    negative_words = 0
+class SentimentAnalysis:
 
-    # Test how many negative and positive keywords the text contains
-    for word in KEYWORDS_POSITIVE:
-        if word in text.lower():
-            positive_words += 1
-    for word in KEYWORDS_NEGATIVE:
-        if word in text.lower():
-            negative_words += 1
+    def __init__(self, api_info):
+        f = open(api_info, "r")
+        self.__key = f.readline().rstrip()
+        self.__endpoint = f.readline().rstrip()
+        self.__client = self.authenticate_client()
 
-    # Return appropriate response
-    if positive_words > negative_words:
-        return "Positive"
-    elif negative_words > positive_words:
-        return "Negative"
-    else:
-        return "Neutral"
+    def authenticate_client(self):
+        ta_credential = AzureKeyCredential(self.__key)
+        text_analytics_client = TextAnalyticsClient(
+            endpoint=self.__endpoint,
+            credential=ta_credential)
+        return text_analytics_client
 
+    def sentiment_analysis_example(self, documents):
+        response = self.__client.analyze_sentiment(documents=documents,language="en")
+        result = [doc for doc in response if not doc.is_error]
+        positive = []
+        neutral = []
+        negative = []
+        for doc in result:
+            positive.append(doc.confidence_scores.positive)
+            neutral.append(doc.confidence_scores.neutral)
+            negative.append(doc.confidence_scores.negative)
 
-def analyze_dataset(dataset):
-    """
-    Analyze sentiment for a list of strings
-    :param dataset: list containing strings to be analyzed
-    :return: string containing sentiment of the dataset( Negative, Neutral or Positive)
-    """
-    positive_amount = 0
-    negative_amount = 0
-
-    # Test sentiment for each text in the dataset using the analyze_text function
-    for text in dataset:
-        sentiment = analyze_text(text)
-        if sentiment == "Positive":
-            positive_amount += 1
-        elif sentiment == "Negative":
-            negative_amount += 1
-
-    # Return appropriate response
-    if positive_amount > negative_amount:
-        return "Positive"
-    elif negative_amount > positive_amount:
-        return "Negative"
-    else:
-        return "Neutral"
-
+        print("Total sentiment for topic: positive={0:.2f}; neutral={1:.2f}; negative={2:.2f} \n".format(
+            statistics.mean(positive),
+            statistics.mean(neutral),
+            statistics.mean(negative)))
